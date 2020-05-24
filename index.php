@@ -5,11 +5,11 @@ class tableRow {
 	public $sumy=array();
 
 	function __construct($pocetStlpcov) {
-		for ($i=0; $i < $pocetStlpcov; $i++) { 
+		for ($i=0; $i < $pocetStlpcov; $i++) {
 			array_push($this->sumy, 0);
 		}
 	}
-	
+
 }
 
 class urovenCasu {
@@ -76,11 +76,11 @@ class Vypis {
 			case 'mesiac':
 				return "mesiacov";
 				break;
-			
+
 			case 'rok':
 				return "rokov";
 				break;
-			
+
 			case 'den':
 				return "dni";
 				break;
@@ -88,12 +88,26 @@ class Vypis {
 			case 'tyzden':
 				return "tyzdnov";
 				break;
-			
-			
+
+
 			default:
 				return "";
 				break;
 		}
+	}
+
+	private function vratNazovTypu($uroven) {
+	    switch ($uroven) {
+	        case 'skupina' :
+	            return "skupin";
+	        case 'typ' :
+	            return "typov";
+	        case 'produkt';
+	           return "produktov";
+	        default :
+	            return "";
+	            break;
+	    }
 	}
 
 	private function vypisSumarPrijmu($nadpis="") {
@@ -108,7 +122,7 @@ class Vypis {
 		foreach ($riadky as $key => $value) {
 			$row=array();
 			array_push($row, $key);
-			
+
 			foreach ($value->sumy as $index=> $stlpec) {
 				$this->nastavStredneHodnoty($key, $this->stlpce[$index], $stlpec);
 				array_push($row, $stlpec);
@@ -125,14 +139,14 @@ class Vypis {
 		if ($_GET["uroven_casu"]=="rok"){
 			$podmienkaCasu="1";
 		}
-		
+
 
 		$sql = "select p.ID_POLOZKY, pp.$urovenRegionu, CONCAT($uroven_casu->concat ) as mesiac_prijmu, SUM(SUMA) as CENA from prijem  as p
 		left join polozka_prijmu as pp on (pp.ID_POLOZKY = p.ID_POLOZKY)
 		 where $podmienkaCasu
 		GROUP BY $uroven_casu->group, pp.$urovenRegionu ";
 		// echo $sql;
-		
+
 		$result = $this->db->Query($sql);
 		$this->vratPolozkyPodlaRegionov();
 		$riadky=array();
@@ -147,17 +161,17 @@ class Vypis {
 			case 'mesiac':
 				$this->casovaUroven="mesiac/rok";
 				$this->nazovCasu="mesiacov";
-				
+
 				return new urovenCasu("MONTH(DATUMCAS)","MONTH(DATUMCAS) ,'/',YEAR(DATUMCAS)");
 
 				break;
-			
+
 			case 'rok':
 				$this->casovaUroven="rok";
 				$this->nazovCasu="rokov";
 				return new urovenCasu("YEAR(DATUMCAS)","YEAR(DATUMCAS)");
 				break;
-			
+
 			case 'den':
 				$this->casovaUroven="den/mesiac/rok";
 				$this->nazovCasu="dni";
@@ -169,8 +183,8 @@ class Vypis {
 				$this->casovaUroven="tyzden/rok";
 				return new urovenCasu("WEEK(DATUMCAS)","WEEK(DATUMCAS) ,'/',YEAR(DATUMCAS)");
 				break;
-			
-			
+
+
 			default:
 				return "";
 				break;
@@ -182,15 +196,15 @@ class Vypis {
 	private function pridajHodnotuDoRiadku($riadok, $riadky) {
 		$urovenRegionu = $_GET["uroven_regionu"];
 		$indexStlpca = array_search($riadok[$urovenRegionu], $this->stlpce);
-		
+
 		if (array_key_exists($riadok["mesiac_prijmu"], $riadky)){
 				$riadky[$riadok["mesiac_prijmu"]]->sumy[$indexStlpca-1] += $riadok["CENA"];
-			
+
 		} else {
 			$row = new tableRow(count($this->stlpce) -1);
 			$row->sumy[$indexStlpca-1] = $riadok["CENA"];
 			$riadky[$riadok["mesiac_prijmu"]] = $row;
-			
+
 		}
 		return $riadky;
 	}
@@ -242,19 +256,19 @@ class Vypis {
     		if(!in_array($riadok[$urovenRegionu], $regiony)) {
     			array_push($regiony, $riadok[$urovenRegionu]);
     		}
-    		
+
 		}
 		$this->stlpce= $regiony;
 		// print_r($this->stlpce);
 		$this->HlavickaTabulky($regiony);
-		
+
 	}
 
 
 	private function HlavickaTabulky ($hlavicka=array()) {
 		echo "<table id='input' class='tabulka'><thead><tr>";
 		foreach ($hlavicka as $stlpec) {
-		echo "<th class='region'>$stlpec</th>";	
+		echo "<th class='region'>$stlpec</th>";
 		}
 		echo "</tr></thead><tbody>";
 	}
@@ -267,7 +281,7 @@ class Vypis {
 			if ($prvok == $key) {
 				echo "<td id='datum_$key' onclick='zobrazPieChart(\"$key\")'>$key</td>";
 			} else {
-				echo "<td class='$identifikatorStlpca'>$prvok</td>";	
+				echo "<td class='$identifikatorStlpca'>$prvok</td>";
 			}
 			$kolkyStlpec++;
 		}
@@ -356,28 +370,28 @@ if (isset($_GET['uroven_regionu']) ) {
 <script type="text/javascript">
 	ZobrazKontingecnuTabulky();
 	function ZobrazKontingecnuTabulky () {
-	
+
     google.load("visualization", "1", {packages:["corechart", "charteditor"]});
     $(function(){
         var derivers = $.pivotUtilities.derivers;
         var renderers = $.extend($.pivotUtilities.renderers,
             $.pivotUtilities.gchart_renderers);
 
-        
+
             $("#output").pivotUI($("#input"), {
                 renderers: $.extend(
       $.pivotUtilities.renderers,
       $.pivotUtilities.plotly_renderers
     ),
                 derivedAttributes: {
-                    
-                    
+
+
                 },
                 cols: ["Age Bin"], rows: ["Gender"],
                 rendererName: "Area Chart",
                 rendererOptions: { gchart: {width: 800, height: 600} }
             });
-        
+
      });
 	}
 
@@ -459,7 +473,7 @@ if (isset($_GET['uroven_regionu']) ) {
 
 	}
 </script>
-<div id="piechart" style="width: 900px; height: 500px;"></div> 
+<div id="piechart" style="width: 900px; height: 500px;"></div>
 <div style="width: 900px; height: 500px;"><div id="output" ></div></div>
 
 
