@@ -168,7 +168,6 @@ class Vypis {
         left join $tabulka_typu_produktu as tp on (tp.ID_PRODUKTU = p.ID_PRODUKTU)
 		 where $podmienkaCasu
 		GROUP BY $uroven_casu->group, pp.$urovenRegionu ";
-// 		echo $sql;
 
 		$result = $this->db->Query($sql);
 		$this->vratPolozkyPodlaRegionov();
