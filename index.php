@@ -131,21 +131,44 @@ class Vypis {
 		}
 	}
 
+	private function vratTabulkuTypuProdultu($uroven_typu) {
+	    switch ($uroven_typu) {
+	        case "produkt" :
+	            return "produkty";
+	        case "typ_produktu" :
+	            return "typ_produktu";
+	        case "skupina_produktu" :
+	            return "skupina_produktu";
+	        default :
+	            return "produkty";
+	            break;
+	    }
+	}
+
 	private function vratUdajePreSumar() {
 		$rok = $_GET["rok"];
 		$uroven_casu = $this->nastavUrovenCasu($_GET["uroven_casu"]);
 		$urovenRegionu = $_GET["uroven_regionu"];
+		$uroven_typu = $_GET["uroven_typu"];
 		$podmienkaCasu= " YEAR(DATUMCAS) = $rok ";
+		$tabulka_typu_produktu = "produkty";
+
 		if ($_GET["uroven_casu"]=="rok"){
 			$podmienkaCasu="1";
 		}
 
+		if (!$uroven_typu) {
+		    $uroven_typu = "ID_PRODUKTU";
+		} else {
+		    $tabulka_typu_produktu = $this->vratTabulkuTypuProdultu($uroven_typu);
+		}
 
-		$sql = "select p.ID_POLOZKY, pp.$urovenRegionu, CONCAT($uroven_casu->concat ) as mesiac_prijmu, SUM(SUMA) as CENA from prijem  as p
+		$sql = "select p.ID_POLOZKY, tp.$uroven_typu, tp.nazov, pp.$urovenRegionu, CONCAT($uroven_casu->concat ) as mesiac_prijmu, SUM(SUMA) as CENA from prijem  as p
 		left join polozka_prijmu as pp on (pp.ID_POLOZKY = p.ID_POLOZKY)
+        left join $tabulka_typu_produktu as tp on (tp.ID_PRODUKTU = p.ID_PRODUKTU)
 		 where $podmienkaCasu
 		GROUP BY $uroven_casu->group, pp.$urovenRegionu ";
-		// echo $sql;
+// 		echo $sql;
 
 		$result = $this->db->Query($sql);
 		$this->vratPolozkyPodlaRegionov();
