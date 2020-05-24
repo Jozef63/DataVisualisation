@@ -1,11 +1,11 @@
 <?
 
 class Databaza {
-	const PRI_RDBMS = "localhost";  
+	const PRI_RDBMS = "localhost";
 	const PRI_LOGIN = "root";
 	const PRI_HESLO = "";
     const PRI_HLAVNA_DATABAZA = "sulekfhiwzcz1615";
-    
+
     private $db;
 
 	function __construct() {
@@ -13,22 +13,22 @@ class Databaza {
 
         $this->VytvorSpojenieNaDatabazu();
         MySQLi_Query($this->db, "set names 'utf8'");
-        
+
     }
 
     /**
      * Vytvori spojenie na DB
      */
     private function VytvorSpojenieNaDatabazu() {
-        
+
          $this->db = MySQLi_Connect(self::PRI_RDBMS, self::PRI_LOGIN, self::PRI_HESLO, self::PRI_HLAVNA_DATABAZA);
-         
+
 		if (mysqli_connect_errno())
 		    error_log("[DBE]: Zlyhalo primarne spojenie: ".mysqli_connect_error());
-        
+
     }
 
-   
+
 
 	function Query($dotaz, $lustraciaTextu=true) {
         // z bezpecnostnych dovodov aby nemohlo byt viac query
@@ -94,7 +94,7 @@ class Databaza {
             return MySQLi_Fetch_Array($tabulka)[0];
     }
 
-    
+
 
 
     // obalenie fetcharrayu
